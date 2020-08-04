@@ -2,6 +2,7 @@ package express.japanese.botto;
 
 import express.japanese.botto.core.modules.enums.Category;
 import express.japanese.botto.core.modules.ModuleInfo;
+import express.japanese.botto.core.modules.enums.ICategory;
 import express.japanese.botto.core.modules.interfaces.annotations.IModule;
 import express.japanese.botto.core.modules.preInstalled.BotCmdListener;
 import express.japanese.botto.core.modules.preInstalled.HelpCmd;
@@ -20,7 +21,7 @@ public class BotController {
     private String prefix;
     protected final List<Module> defaultModules;
     private final BotCmdListener listener;
-    public final HashMap<Category, List<Module>> modulesByCategory;
+    public final HashMap<ICategory, List<Module>> modulesByCategory;
     public final List<Module> modulesTrackMessages;
     public final HashMap<String, Module> modules;
     public final List<Class<? extends Module>> failedModules;

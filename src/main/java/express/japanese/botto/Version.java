@@ -13,9 +13,9 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 public class Version {
-    public static final int[] current = new int[]{3, 0, 0};
+    public static final int[] current = new int[]{1, 0, 1};
     public static String latest;
-    private final String url = "https://api.github.com/repos/Ashleyz4/Bot_Ant-Bot-Core/releases";
+    private final String url = "https://api.github.com/repos/Japanese-Express/Botto-Framework/releases";
 
     static void CompareVersion() {
         JSONParser parser = new JSONParser();
@@ -50,7 +50,7 @@ public class Version {
                     if (current[i] >= tag[i]) continue;
                     System.out.println("\nA new version of Bot_Ant-Bot-Core was released at " + pub);
                     System.out.println("  You have version " + current[0] + "." + current[1] + "." + current[2] + ", the new version is " + tagSuper);
-                    System.out.println("You can find it at https://github.com/Ashleyz4/Bot_Ant-Bot-Core/releases/latest\n");
+                    System.out.println("You can find it at https://github.com/Japanese-Express/Botto-Framework/releases/latest\n");
                     return;
                 }
             }

@@ -27,19 +27,16 @@ public class Images {
             in.close();
             out.close();
             return true;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
-            return false;
         }
+        return false;
     }
 
-    public void deleteAfterDelay(Integer seconds, final String fileName, Boolean deleteOnExit) {
-        if (deleteOnExit) {
+    public void deleteAfterDelay(int seconds, final String fileName, Boolean deleteOnExit) {
+        if (deleteOnExit)
             new File(fileName + ".png").deleteOnExit();
-        }
         new Timer().schedule(new TimerTask(){
-
             @Override
             public void run() {
                 new File(fileName + ".png").delete();

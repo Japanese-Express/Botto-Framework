@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.time.temporal.TemporalAccessor;
 import java.util.*;
 
+import express.japanese.botto.core.modules.interfaces.ToBeRemoved;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
@@ -112,7 +113,25 @@ public class RichEmbed {
         return eb.build();
     }
 
+    @Override
+    public String toString() {
+        return "RichEmbed{" +
+                "fields=" + fields +
+                ", color=" + color +
+                ", description='" + description + '\'' +
+                ", title='" + title + '\'' +
+                ", avatarRedirect='" + avatarRedirect + '\'' +
+                ", avatar='" + avatar + '\'' +
+                ", footerText='" + footerText + '\'' +
+                ", footerIcon='" + footerIcon + '\'' +
+                ", time=" + time +
+                ", image='" + image + '\'' +
+                ", thumbnail='" + thumbnail + '\'' +
+                '}';
+    }
+
     @Deprecated
+    @ToBeRemoved("Un-needed, use `new RichEmbed()` instead")
     public static EmbedBuilder create(User user, String desc, String imageUrl, Color color, MessageEmbed.Field[] field) {
         EmbedBuilder eb = new EmbedBuilder().setAuthor(user.getName(), null, user.getAvatarUrl()).setDescription(desc).setImage(imageUrl).setColor(color);
         eb.setFooter(String.valueOf(new Date()), null);
@@ -125,6 +144,7 @@ public class RichEmbed {
     }
 
     @Deprecated
+    @ToBeRemoved("Un-needed, use `new RichEmbed()` instead")
     public static EmbedBuilder create(User user, String url, String desc, String imageUrl, Color color, MessageEmbed.Field[] field) {
         EmbedBuilder eb = new EmbedBuilder().setAuthor(user.getName(), url, user.getAvatarUrl()).setDescription(desc).setImage(imageUrl).setColor(color);
         eb.setFooter(String.valueOf(new Date()), null);
@@ -137,6 +157,7 @@ public class RichEmbed {
     }
 
     @Deprecated
+    @ToBeRemoved("Un-needed, use `new RichEmbed()` instead")
     public static EmbedBuilder create(String desc, String imageUrl, Color color, MessageEmbed.Field[] field) {
         EmbedBuilder eb = new EmbedBuilder().setDescription(desc).setImage(imageUrl).setColor(color);
         eb.setFooter(String.valueOf(new Date()), null);

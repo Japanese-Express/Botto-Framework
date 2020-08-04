@@ -3,6 +3,7 @@ package express.japanese.botto;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import express.japanese.botto.misc.BotJsonReader;
+import express.japanese.botto.misc.ReaderResponse;
 
 import javax.annotation.Nullable;
 import java.io.File;
@@ -24,13 +25,16 @@ public class StaticConfig {
         return jsonObject.has(s);
     }
 
-    @Nullable
-    public static String getStr(String s) {
-        return jsonObject.has(s) ? jsonObject.get(s).getAsString() : null;
+    public static boolean has(String key) {
+        return jsonObject.has(key);
     }
     @Nullable
-    public static JsonElement get(String s) {
-        return jsonObject.has(s) ? jsonObject.get(s) : null;
+    public static String getStr(String key) {
+        return has(key) ? jsonObject.get(key).getAsString() : null;
+    }
+    @Nullable
+    public static JsonElement get(String key) {
+        return has(key) ? jsonObject.get(key) : null;
     }
 
 
@@ -61,9 +65,9 @@ public class StaticConfig {
                 e.printStackTrace();
             }
         }
-        Object mbJson = BotJsonReader.readFromFile(conf);
-        if(mbJson != null)
-            jsonObject = (JsonObject) mbJson;
+        ReaderResponse<JsonObject> mbJson = BotJsonReader.readFromFile(conf, JsonObject.class);
+        if(!mbJson.responseCodeIsError())
+            jsonObject = mbJson.getReturned();
     }
 
     static {

@@ -18,6 +18,7 @@ public @interface IModule {
     String fullDescription() default "";
 
     Category category();
+    String customCategoryName() default "";
 
     //@Deprecated String[] altNames() default {};
     //@Deprecated Permission[] permissions() default {Permission.UNKNOWN};

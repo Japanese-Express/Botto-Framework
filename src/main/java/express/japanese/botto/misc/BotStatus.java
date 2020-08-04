@@ -1,10 +1,12 @@
 package express.japanese.botto.misc;
 
 import express.japanese.botto.StaticConfig;
+import express.japanese.botto.core.modules.interfaces.ToBeRemoved;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Activity;
 
 @Deprecated
+@ToBeRemoved("This is really bad, and really old code")
 class BotStatus {
     @Deprecated
     public static void SetStatus(JDA jda, Activity.ActivityType type, String status) {

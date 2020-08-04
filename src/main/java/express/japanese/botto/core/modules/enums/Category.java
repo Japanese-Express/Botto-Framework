@@ -1,6 +1,6 @@
 package express.japanese.botto.core.modules.enums;
 
-public enum Category {
+public enum Category implements ICategory {
     General,
     OwnerOnly,
     Admin,
@@ -21,6 +21,16 @@ public enum Category {
     Bot,
     Any,
     Unknown;
-    Category() {}
+    Category() { }
+
+    @Override
+    public boolean isCustom() {
+        return false;
+    }
+
+    @Override
+    public String getName() {
+        return this.name();
+    }
 }
 

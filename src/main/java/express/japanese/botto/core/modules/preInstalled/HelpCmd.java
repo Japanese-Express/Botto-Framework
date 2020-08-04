@@ -1,5 +1,6 @@
 package express.japanese.botto.core.modules.preInstalled;
 
+import express.japanese.botto.core.modules.enums.ICategory;
 import express.japanese.botto.core.modules.module.CmdModule;
 import express.japanese.botto.core.modules.module.Module;
 import express.japanese.botto.core.modules.interfaces.Author;
@@ -27,13 +28,13 @@ public class HelpCmd extends CmdModule {
     @Override
     public void run(String cmd, String[] args, Message msg) {
         PrivateChannel channel = msg.getAuthor().openPrivateChannel().complete();
-        Map.Entry<Category, List<Module>> selectedCategory = null;
+        Map.Entry<ICategory, List<Module>> selectedCategory = null;
         if (args != null && args.length > 0) {
-            Map<Category, List<Module>> arrangedMap = this.botControllerInst.modulesByCategory;
-            for (Map.Entry<Category, List<Module>> entry : arrangedMap.entrySet()) {
+            Map<ICategory, List<Module>> arrangedMap = this.botControllerInst.modulesByCategory;
+            for (Map.Entry<ICategory, List<Module>> entry : arrangedMap.entrySet()) {
                 if(entry.getValue().isEmpty())
                     continue;
-                if(args[0].equalsIgnoreCase(entry.getKey().name())) {
+                if(args[0].equalsIgnoreCase(entry.getKey().getName())) {
                     selectedCategory = entry;
                     break;
                 }
@@ -48,7 +49,7 @@ public class HelpCmd extends CmdModule {
         channel.close().queue();
     }
 
-    private RichEmbed createRichEmbed(Message msg, Map.Entry<Category, List<Module>> selectedCategory) {
+    private RichEmbed createRichEmbed(Message msg, Map.Entry<ICategory, List<Module>> selectedCategory) {
         String desc =   "**A powerful yet simple Discord Bot framework: http://github.com/Japanese-Express/Botto-Framework*"
                 +       "\n\n__Use `"+getPrefix()+"help <cmd>` for help on any module__";
         RichEmbed richEmbed = new RichEmbed()
@@ -59,12 +60,12 @@ public class HelpCmd extends CmdModule {
                 .setThumbnail(getJDA().getSelfUser().getAvatarUrl())
                 .setAvatar(msg.getAuthor().getAvatarUrl());
                 //.setDescription(this.getmodules().toString());
-        Map<Category, List<Module>> arrangedMap = this.botControllerInst.modulesByCategory;
+        Map<ICategory, List<Module>> arrangedMap = this.botControllerInst.modulesByCategory;
         if(selectedCategory == null) {
-            for (Map.Entry<Category, List<Module>> entry : arrangedMap.entrySet()) {
+            for (Map.Entry<ICategory, List<Module>> entry : arrangedMap.entrySet()) {
                 if (entry.getValue().isEmpty())
                     continue;
-                String category = entry.getKey().name();
+                String category = entry.getKey().getName();
                 StringBuilder help = new StringBuilder();
                 List<Module> modules = entry.getValue();
                 for(int i = 0; i< modules.size(); i++) {
@@ -81,7 +82,7 @@ public class HelpCmd extends CmdModule {
                     richEmbed.addField(category, help.toString(), false);
             }
         } else {
-            String category = selectedCategory.getKey().name();
+            String category = selectedCategory.getKey().getName();
             StringBuilder help = new StringBuilder();
             List<Module> modules = selectedCategory.getValue();
             for(int i=0;i < modules.size();i++) {
@@ -121,9 +122,9 @@ public class HelpCmd extends CmdModule {
 
     public StringBuilder getmodules() {
         StringBuilder help = new StringBuilder("All the premodules you can use:\n\n\n");
-        TreeMap<Category, List<Module>> arrangedMap = new TreeMap<>(this.botControllerInst.modulesByCategory);
-        for (Map.Entry<Category, List<Module>> entry : arrangedMap.entrySet()) {
-            help.append(entry.getKey().name()).append(" Category:\n");
+        TreeMap<ICategory, List<Module>> arrangedMap = new TreeMap<>(this.botControllerInst.modulesByCategory);
+        for (Map.Entry<ICategory, List<Module>> entry : arrangedMap.entrySet()) {
+            help.append(entry.getKey().getName()).append(" Category:\n");
             List<Module> modules = entry.getValue();
             for (int i = 0; i < modules.size() - 1; ++i) {
                 Module module = modules.get(i);
