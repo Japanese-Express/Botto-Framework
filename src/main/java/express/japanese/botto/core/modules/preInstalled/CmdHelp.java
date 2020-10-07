@@ -1,35 +1,43 @@
 package express.japanese.botto.core.modules.preInstalled;
 
 import express.japanese.botto.core.modules.enums.ICategory;
+import express.japanese.botto.core.modules.enums.Language;
+import express.japanese.botto.core.modules.interfaces.annotations.ILanguage;
 import express.japanese.botto.core.modules.module.CmdModule;
 import express.japanese.botto.core.modules.module.Module;
 import express.japanese.botto.core.modules.interfaces.Author;
 import express.japanese.botto.core.modules.interfaces.annotations.IModule;
-import express.japanese.botto.core.modules.enums.Category;
+import express.japanese.botto.core.modules.enums.BotCategory;
 import express.japanese.botto.core.modules.interfaces.IsDefault;
-import express.japanese.botto.misc.RichEmbed;
+import express.japanese.botto.misc.modulistic.RichEmbed;
 import java.awt.Color;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.PrivateChannel;
+import net.dv8tion.jda.api.entities.MessageChannel;
+import org.jetbrains.annotations.NotNull;
 
 @IModule(   names={"help", "helpme", "helpp", "help-me"},
-        tinyDescription ="Gives some help",
-        category= Category.Bot,
+        tinyDescription = {
+                @ILanguage(language = Language.ENGLISH,
+                        value = "Gives some help")},
+        category= BotCategory.Bot,
         channelTypes = {
                 ChannelType.TEXT, ChannelType.GROUP, ChannelType.PRIVATE
         })
 @IsDefault
 @Author("cutezyash#7654")
-public class HelpCmd extends CmdModule {
+public class CmdHelp extends CmdModule {
     @Override
-    public void run(String cmd, String[] args, Message msg) {
-        PrivateChannel channel = msg.getAuthor().openPrivateChannel().complete();
+    public void run(String cmd, @NotNull String[] args, Message msg) {
+        //PrivateChannel channel = msg.getAuthor().openPrivateChannel().complete();
+        MessageChannel channel = msg.getChannel();
         Map.Entry<ICategory, List<Module>> selectedCategory = null;
-        if (args != null && args.length > 0) {
+        if (args.length > 0) {
             Map<ICategory, List<Module>> arrangedMap = this.botControllerInst.modulesByCategory;
             for (Map.Entry<ICategory, List<Module>> entry : arrangedMap.entrySet()) {
                 if(entry.getValue().isEmpty())
@@ -46,12 +54,12 @@ public class HelpCmd extends CmdModule {
             }
         }
         channel.sendMessage(createRichEmbed(msg, selectedCategory).build()).queue();
-        channel.close().queue();
+        //channel.close().queue();
     }
 
     private RichEmbed createRichEmbed(Message msg, Map.Entry<ICategory, List<Module>> selectedCategory) {
         String desc =   "**A powerful yet simple Discord Bot framework: http://github.com/Japanese-Express/Botto-Framework*"
-                +       "\n\n__Use `"+getPrefix()+"help <cmd>` for help on any module__";
+                +       "\n\n__Use `"+getPrefix()[0]+"help <cmd>` for help on any module__";
         RichEmbed richEmbed = new RichEmbed()
                 .setFooterAsCurrentTime()
                 .setColor(Color.PINK)
@@ -104,18 +112,29 @@ public class HelpCmd extends CmdModule {
     public void getHelpFrom(String cmd, Message msg) {
         Module module = this.botControllerInst.getModule(cmd);
         if (module != null) {
-            PrivateChannel channel = msg.getAuthor().openPrivateChannel().complete();
+            MessageChannel channel = msg.getChannel();
+            //PrivateChannel channel = msg.getAuthor().openPrivateChannel().complete();
             IModule annotation = module.getModuleInterface();
-            String text = "Help information for **" + annotation.names()[0] + "**:";
+            StringBuilder text = new StringBuilder("Help information for **" + annotation.names()[0] + "**:");
             if (annotation.names().length > 1) {
-                text = text + "\n    *Alt Names*: ";
+                text.append("\n    *Alt Names*: ");
                 for (int i = 1; i < annotation.names().length; ++i) {
-                    text = i == annotation.names().length - 1 ? text + annotation.names()[i] : text + annotation.names()[i] + ", ";
+                    text = new StringBuilder(i == annotation.names().length - 1 ? text + annotation.names()[i] : text + annotation.names()[i] + ", ");
                 }
             }
-            text = text + "\n\n" + annotation.tinyDescription();
-            channel.sendMessage(text).queue();
-            channel.close().queue();
+            if(annotation.permissions().usePermissions()) {
+                text.append(" \n **Required Permissions**: ");
+                for(Permission permission : annotation.permissions().permissionsToUse()) {
+                    text.append("\n  - *").append(permission.getName()).append("*");
+                }
+            }
+            String tiny = this.getTinyDescByLang(Language.ENGLISH).value();
+            String full = this.getFullDescByLang(Language.ENGLISH).value();
+            text.append("\n\n")
+                    .append(tiny)
+                    .append(!full.isEmpty() ? "\n\n" + full : "");
+            channel.sendMessage(text.toString()).queue();
+            //channel.close().queue();
         } else
             msg.getChannel().sendMessage("That module does not exist, did you misspell it?").queue();
     }

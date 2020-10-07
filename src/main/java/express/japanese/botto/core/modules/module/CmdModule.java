@@ -1,46 +1,58 @@
 package express.japanese.botto.core.modules.module;
 
+import express.japanese.botto.core.modules.enums.BotCategory;
+import express.japanese.botto.core.modules.enums.Language;
+import express.japanese.botto.core.modules.interfaces.annotations.ILanguage;
+import express.japanese.botto.core.modules.interfaces.annotations.IModule;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
-import express.japanese.botto.core.modules.enums.Category;
-import express.japanese.botto.core.modules.enums.ModuleError;
-import express.japanese.botto.core.modules.interfaces.annotations.IModule;
 
-import java.util.ArrayList;
-import java.util.List;
+import javax.annotation.Nonnull;
 import java.util.Timer;
 import java.util.TimerTask;
 
+/**
+ * <h1>Module for Commands</h1>
+ * <p>This module is used specifically for commands.
+ * However, it can also be used for various other
+ * things such as tracking user messages with
+ * the setting enabled inside of an interface module</p>
+ */
 @IModule(
-        names = {}, tinyDescription = "", category = Category.Unknown, channelTypes = ChannelType.UNKNOWN)
+        names = {}, tinyDescription = {@ILanguage(language = Language.ENGLISH, value = "")},
+        category = BotCategory.Unknown, channelTypes = ChannelType.UNKNOWN)
 public abstract class CmdModule extends Module {
-    private final List<ModuleError> errors = new ArrayList<>();
-
     /*public CmdModule(IModule moduleInstance) {
         super(moduleInstance);
         this.moduleInstance = moduleInstance;
     }*/
 
-    public abstract void run(String cmd, String[] args, Message msg);
-
-    public void triggerError(ModuleError error) {
-        this.errors.add(error);
-    }
-
-    public boolean onUserMessage(String[] args, Message msg) { return false; }
+    /**
+     * Runs this module
+     * @param cmd Name of command that was ran
+     * @param args Arguments in message
+     * @param msg Message artifact
+     */
+    public abstract void run(String cmd, @Nonnull String[] args, Message msg);
 
     /**
      * Runs the help command for the chosen module
      * @param forModuleName literal module name
      * @see IModule
      */
-    public void runHelpCmd(Message msg, String forModuleName) {
+    public final void runHelpCmd(Message msg, String forModuleName) {
         CmdModule helpModule = (CmdModule) this.botControllerInst.getModule("help");
         if(helpModule == null)
             return;
         helpModule.run("cmd", new String[]{forModuleName}, msg);
     }
 
+    /**
+     * Check if self-bot has permission for channel
+     * @param channel Channel for permission
+     * @param permission Permission to check
+     * @return successful
+     */
     public final boolean botHasPerm(GuildChannel channel, Permission permission) {
         User user = getJDA().getSelfUser();
         Member member = channel.getGuild().getMember(user);
@@ -50,13 +62,18 @@ public abstract class CmdModule extends Module {
     }
 
     private static final Timer timer = new Timer();
-    public final void deleteMessageAfter(Message msg, int ms, boolean isSeconds) {
+    /**
+     * Deletes a certain message after x amount of MS
+     * @param msg Message artifact
+     * @param ms Milliseconds
+     */
+    public final void deleteMessageAfter(Message msg, int ms) {
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
                 msg.delete().queue();
             }
-        }, isSeconds ? ms*1000 : ms);
+        }, ms);
     }
 }
 

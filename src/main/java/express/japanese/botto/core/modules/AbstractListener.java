@@ -31,7 +31,8 @@ public abstract class AbstractListener extends ListenerAdapter {
         long addUp = iCooldown.cooldownMillis();
         if(cooldownMap.containsKey(userId) && cooldownMap.get(userId) < (System.currentTimeMillis() + addUp)) {
             if(msgErr.isBeingUsed()) {
-                TextChannel channel = msgErr.msgStyle().getChannelFromStyle(msg);
+                TextChannel channel = msgErr.msgStyle().getChannelFromStyle(
+                        (TextChannel)msg.getChannel(), msg.getAuthor());
                 if(channel != null && channel.canTalk())
                     channel.sendMessage(msgErr.msg()).queue();
                 if(msgErr.showInConsole())
@@ -56,24 +57,33 @@ public abstract class AbstractListener extends ListenerAdapter {
         return false;
     }
 
+    public boolean userHasPermissionsFor(TextChannel channel, Guild guild, User user, IPermissions iPermissions) {
+        if(iPermissions.usePermissions())
+            return permissionCheckFor(channel, guild, user, iPermissions);
+        return true;
+    }
     public boolean userHasPermissionsFor(Message msg, IPermissions iPermissions) {
-        if(iPermissions.usePermissions()) {
-            Permission[] permissions = iPermissions.permissionsToUse();
-            for(Permission perm : permissions) {
-                if (msg.getChannelType() != ChannelType.TEXT)
-                    break;
-                Member member = msg.getGuild().getMember(msg.getAuthor());
-                if(member != null && member.getPermissions().contains(perm))
-                    continue;
-                IMsgErr iMsgErr = iPermissions.permErrorMsg();
-                if(iMsgErr.isBeingUsed()) {
-                    TextChannel channel = iMsgErr.msgStyle().getChannelFromStyle(msg);
-                    if(channel != null && channel.canTalk())
-                        channel.sendMessage(iMsgErr.msg()).queue();
-                    if(iMsgErr.showInConsole())
-                        System.out.println(iMsgErr.msg());
-                    return false;
-                }
+        if(iPermissions.usePermissions() && msg.getChannelType() == ChannelType.TEXT) {
+            return permissionCheckFor(
+                    (TextChannel) msg.getChannel(),
+                    msg.getGuild(), msg.getAuthor(), iPermissions);
+        }
+        return true;
+    }
+    private boolean permissionCheckFor(TextChannel textChannel, Guild guild, User user, IPermissions iPermissions) {
+        Permission[] permissions = iPermissions.permissionsToUse();
+        for(Permission perm : permissions) {
+            Member member = guild.getMember(user);
+            if (member != null && member.getPermissions().contains(perm))
+                continue;
+            IMsgErr iMsgErr = iPermissions.permErrorMsg();
+            if (iMsgErr.isBeingUsed()) {
+                TextChannel channel = iMsgErr.msgStyle().getChannelFromStyle(textChannel, user);
+                if (channel != null && channel.canTalk())
+                    channel.sendMessage(iMsgErr.msg()).queue();
+                if (iMsgErr.showInConsole())
+                    System.out.println(iMsgErr.msg());
+                return false;
             }
         }
         return true;

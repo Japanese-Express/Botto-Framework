@@ -2,6 +2,8 @@ package express.japanese.botto.core.modules.enums;
 
 public enum ModuleError {
     UNKNOWN("Unknown"),
+    CONSTRUCTOR("Constructor had an error"),
+    INVALID_VARIABLE("Some variable was invalid and caused an error"),
     INVALID_CHANNEL("Invalid channel"),
     MESSAGE_SEND("Failed to send messages"),
     INVALID_MESSAGE_ID("Failed to gather messageId"),

@@ -1,4 +1,4 @@
-package express.japanese.botto.misc;
+package express.japanese.botto.misc.modulistic;
 
 import java.awt.Color;
 import java.time.temporal.TemporalAccessor;
@@ -8,6 +8,8 @@ import express.japanese.botto.core.modules.interfaces.ToBeRemoved;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
+
+import javax.annotation.Nonnull;
 
 public class RichEmbed {
     private List<MessageEmbed.Field> fields;
@@ -92,7 +94,53 @@ public class RichEmbed {
         return this;
     }
 
-    public RichEmbed addField(String name, String desc, boolean inline) {
+    public String getTitle() {
+        return title;
+    }
+
+    public Color getColor() {
+        return color;
+    }
+
+    public List<MessageEmbed.Field> getFields() {
+        return fields;
+    }
+
+    public String getAvatar() {
+        return avatar;
+    }
+
+    public String getAvatarRedirect() {
+        return avatarRedirect;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public String getFooterIcon() {
+        return footerIcon;
+    }
+
+    public String getFooterText() {
+        return footerText;
+    }
+
+    public String getThumbnail() {
+        return thumbnail;
+    }
+
+    public TemporalAccessor getTime() {
+        return time;
+    }
+
+    public String getImage() {
+        return image;
+    }
+
+    public RichEmbed addField(@Nonnull String name, String desc, boolean inline) {
+        if(desc == null || desc.isEmpty())
+            desc = "?";
         MessageEmbed.Field field = new MessageEmbed.Field(name, desc, inline);
         this.fields.add(field);
         return this;
@@ -128,45 +176,6 @@ public class RichEmbed {
                 ", image='" + image + '\'' +
                 ", thumbnail='" + thumbnail + '\'' +
                 '}';
-    }
-
-    @Deprecated
-    @ToBeRemoved("Un-needed, use `new RichEmbed()` instead")
-    public static EmbedBuilder create(User user, String desc, String imageUrl, Color color, MessageEmbed.Field[] field) {
-        EmbedBuilder eb = new EmbedBuilder().setAuthor(user.getName(), null, user.getAvatarUrl()).setDescription(desc).setImage(imageUrl).setColor(color);
-        eb.setFooter(String.valueOf(new Date()), null);
-        if (field != null) {
-            for (MessageEmbed.Field s : field) {
-                eb.addField(s);
-            }
-        }
-        return eb;
-    }
-
-    @Deprecated
-    @ToBeRemoved("Un-needed, use `new RichEmbed()` instead")
-    public static EmbedBuilder create(User user, String url, String desc, String imageUrl, Color color, MessageEmbed.Field[] field) {
-        EmbedBuilder eb = new EmbedBuilder().setAuthor(user.getName(), url, user.getAvatarUrl()).setDescription(desc).setImage(imageUrl).setColor(color);
-        eb.setFooter(String.valueOf(new Date()), null);
-        if (field != null) {
-            for (MessageEmbed.Field s : field) {
-                eb.addField(s);
-            }
-        }
-        return eb;
-    }
-
-    @Deprecated
-    @ToBeRemoved("Un-needed, use `new RichEmbed()` instead")
-    public static EmbedBuilder create(String desc, String imageUrl, Color color, MessageEmbed.Field[] field) {
-        EmbedBuilder eb = new EmbedBuilder().setDescription(desc).setImage(imageUrl).setColor(color);
-        eb.setFooter(String.valueOf(new Date()), null);
-        if (field != null) {
-            for (MessageEmbed.Field s : field) {
-                eb.addField(s);
-            }
-        }
-        return eb;
     }
 }
 

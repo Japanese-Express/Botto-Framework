@@ -1,9 +1,10 @@
 package express.japanese.botto.core.modules.interfaces.annotations;
 
-import express.japanese.botto.core.modules.enums.Category;
+import express.japanese.botto.core.modules.enums.BotCategory;
 
 import java.lang.annotation.*;
 
+import express.japanese.botto.core.modules.enums.Language;
 import net.dv8tion.jda.api.entities.ChannelType;
 
 @Retention(value=RetentionPolicy.RUNTIME)
@@ -11,13 +12,14 @@ import net.dv8tion.jda.api.entities.ChannelType;
 public @interface IModule {
     String[] names();
 
-    boolean trackUserMessages() default false;
     boolean useInHelp() default true;
 
-    String tinyDescription();
-    String fullDescription() default "";
+    ILanguage[] tinyDescription();
+    ILanguage[] fullDescription() default @ILanguage(
+            language = Language.UNKNOWN, value = ""
+    );
 
-    Category category();
+    BotCategory category();
     String customCategoryName() default "";
 
     //@Deprecated String[] altNames() default {};
@@ -26,6 +28,9 @@ public @interface IModule {
 
     ICooldown cooldown() default @ICooldown(
             useCooldown = false
+    );
+    IPermissions botPermissions() default @IPermissions(
+            usePermissions = false, permissionsToUse = {}
     );
     IPermissions permissions() default @IPermissions(
         usePermissions = false, permissionsToUse = {}

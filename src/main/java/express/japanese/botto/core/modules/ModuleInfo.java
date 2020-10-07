@@ -38,7 +38,8 @@ public class ModuleInfo {
         try {
             this.module = moduleClass.getConstructor().newInstance();
             this.module.setModuleInterface(moduleAnnotation);
-        } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
+        } catch (Exception e) {
+            e.printStackTrace();
             error = ModuleError.FAILED_TO_INSTANCE;
             throw ModuleException.Throw(this);
         }

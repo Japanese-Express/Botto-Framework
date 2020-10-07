@@ -1,12 +1,16 @@
 package express.japanese.botto;
 
 import express.japanese.botto.core.modules.ModuleInfo;
-import express.japanese.botto.core.modules.preInstalled.BotCmdListener;
-import express.japanese.botto.core.modules.preInstalled.HelpCmd;
-import express.japanese.botto.core.modules.preInstalled.VersionCmd;
+import express.japanese.botto.core.modules.enums.Language;
+import express.japanese.botto.core.modules.interfaces.annotations.ILanguage;
+import express.japanese.botto.core.modules.interfaces.annotations.IModule;
+import express.japanese.botto.core.modules.preInstalled.*;
 import express.japanese.botto.core.modules.module.Module;
 
+import javax.annotation.Nonnull;
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class BotBuilder {
@@ -28,16 +32,20 @@ public class BotBuilder {
     }
 
     boolean shouldCreateDefaultCmds = true;
+    private ArrayList<String> preloadPackages = new ArrayList<>();
+    private ArrayList<Language> usedLanguages = new ArrayList<>();
+    private Language defaultLanguage = Language.ENGLISH;
+    private File languageLocation;
     private String token = "";
-    private String prefix = "";
+    private String ownerId = "";
+    private String[] prefix = {"!"};
     private boolean hasBuilt = false;
-    private ArrayList<ModuleInfo> moduleInfoList = new ArrayList<>();
     private Shard shard = null;
-    Class<? extends BotCmdListener> listener = BotCmdListener.class;
+    Class<? extends UsableBotListener> listener = UsableBotListener.class;
 
     private static List<Class<? extends Module>> defaultModules = new ArrayList<Class<? extends Module>>(){
         {
-            add(VersionCmd.class); add(HelpCmd.class);
+            add(CmdVersion.class); add(CmdHelp.class); add(CmdLang.class);
         }
     };
     BotBuilder() {
@@ -72,8 +80,66 @@ public class BotBuilder {
         return this;
     }
 
+    /**
+     * Set if bot should append default commands to module list
+     * @param b bool
+     * @return BotBuilder
+     */
     public BotBuilder setShouldCreateDefaultCmds(boolean b) {
         this.shouldCreateDefaultCmds = b;
+        return this;
+    }
+
+    /**
+     * Set this bot to be able to use the following languages
+     * Users can switch languages with the lang command
+     * @param languages
+     * @return BotBuilder
+     * @see ILanguage
+     */
+    public BotBuilder usesLanguage(@Nonnull Language... languages) {
+        this.usedLanguages.addAll(Arrays.asList(languages));
+        return this;
+    }
+
+    /**
+     * Sets the default language to always use for the bot.
+     * useful for module descriptions.
+     * @param language
+     * @return BotBuilder
+     * @see ILanguage
+     */
+    public BotBuilder setDefaultLanguage(@Nonnull Language language) {
+        this.defaultLanguage = language;
+        return this;
+    }
+
+    /**
+     * Set the bots lang file location.
+     * This location will be used for each file upon `usesLaugage()`
+     * @param languageLocation Directory Location
+     * @return BotBuilder
+     */
+    public BotBuilder setLanguageLocation(File languageLocation) {
+        this.languageLocation = languageLocation;
+        return this;
+    }
+
+    /**
+     * Initialize modules upon build, instead of after
+     * <p>Initializes multiple modules based on a package
+     * location, same usage as initializeModule() but
+     * instead returns a list of info about each
+     * module that was started.</p>
+     * @param packageLocation Package location of which
+     *                        all your modules are located.
+     *                        For example:
+     *                        "xyz.cutezy.bot.commands"
+     * @return BotBuilder
+     * @see ModuleInfo
+     */
+    public final BotBuilder initializeModulesFromPackage(String packageLocation) {
+        preloadPackages.add(packageLocation);
         return this;
     }
 
@@ -82,7 +148,7 @@ public class BotBuilder {
      * @param listener Listener class to instantiate
      * @return BotBuilder
      */
-    public BotBuilder setListener(Class<? extends BotCmdListener> listener) {
+    public BotBuilder setListener(Class<? extends UsableBotListener> listener) {
         this.listener = listener;
         return this;
     }
@@ -95,6 +161,26 @@ public class BotBuilder {
     public BotBuilder setToken(String token) {
         this.token = token;
         return this;
+    }
+
+    /**
+     * Set the prefix of this bot
+     * @param prefix Prefix to use
+     * @return BotBuilder
+     */
+    public BotBuilder setPrefix(String... prefix) {
+        this.prefix = prefix;
+        return this;
+    }
+
+    /**
+     * Sets the owner of this bot for use with
+     * the ModuleInterface
+     * @param ownerId Discord ID
+     * @see IModule
+     */
+    public void setOwnerId(String ownerId) {
+        this.ownerId = ownerId;
     }
 
     /**
@@ -115,11 +201,48 @@ public class BotBuilder {
         if(this.token.isEmpty()) {
             throw new RuntimeException("Invalid token listed for Bot");
         }
+        /*if(this.usedLanguages.isEmpty()) {
+            throw new RuntimeException("There are no languages being used. Apply one with usesLanguage()");
+        }
         if(this.prefix.trim().isEmpty())
-            this.prefix = StaticConfig.getPrefix();
+            this.prefix = StaticConfig.getPrefix();*/
+        if(languageLocation == null)
+            languageLocation = new File("./global/lang/");
         BotController bot = new BotController(this);
         hasBuilt = true;
         return bot;
+    }
+
+    /**
+     * Obtains packages to be initialized on load
+     * @return ArrayList<String>
+     */
+    public ArrayList<String> getPreloadPackages() {
+        return preloadPackages;
+    }
+
+    /**
+     * Get all used languages for this bot
+     * @return ArrayList<Language>
+     */
+    public ArrayList<Language> getUsedLanguages() {
+        return usedLanguages;
+    }
+
+    /**
+     * Get language files location via directory
+     * @return File as Directory
+     */
+    public File getLanguageLocation() {
+        return languageLocation;
+    }
+
+    /**
+     * Gets default language for this bot
+     * @return Language
+     */
+    public Language getDefaultLanguage() {
+        return defaultLanguage;
     }
 
     /**
@@ -128,6 +251,14 @@ public class BotBuilder {
      */
     public Shard getShard() {
         return shard;
+    }
+
+    /**
+     * Returns the currently set ownerId
+     * @return String value of Discord ID
+     */
+    public String getOwnerId() {
+        return ownerId;
     }
 
     /**
@@ -142,7 +273,7 @@ public class BotBuilder {
      * Gets the set prefix for this bot
      * @return String
      */
-    public String getPrefix() {
+    public String[] getPrefix() {
         return prefix;
     }
 }

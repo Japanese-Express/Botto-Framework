@@ -4,9 +4,8 @@ import express.japanese.botto.core.modules.ModuleInfo;
 
 public class ModuleException {
     public static RuntimeException Throw(ModuleInfo moduleInfo) {
-        return new RuntimeException(
-                "ModuleException on " + moduleInfo.getExtractedClass().getSimpleName(),
-                new Throwable(moduleInfo.getError().getErrorMsg())
+        return new RuntimeException(moduleInfo.getError().getErrorMsg(),
+                new Throwable(moduleInfo.getExtractedClass().toGenericString())
         );
     }
     public static void Err(ModuleInfo moduleInfo) {
