@@ -8,8 +8,6 @@ import express.japanese.botto.core.modules.module.CmdModule;
 import express.japanese.botto.core.modules.module.Module;
 import express.japanese.botto.core.ModuleException;
 
-import java.lang.reflect.InvocationTargetException;
-
 public class ModuleInfo {
     private ModuleError error = null;
     private final IsDefault isDefault;
@@ -23,7 +21,7 @@ public class ModuleInfo {
         this.moduleAnnotation = moduleAnnotation;
         if(moduleAnnotation == null) {
             error = ModuleError.NO_ANNOTATION;
-            ModuleException.Err(this);
+            ModuleException.SilentThrowModule(this);
             this.isDefault = null;
             this.module = null;
             this.moduleAuthor = null;
@@ -38,6 +36,7 @@ public class ModuleInfo {
         try {
             this.module = moduleClass.getConstructor().newInstance();
             this.module.setModuleInterface(moduleAnnotation);
+            this.module.setModuleInfo(this);
         } catch (Exception e) {
             e.printStackTrace();
             error = ModuleError.FAILED_TO_INSTANCE;
@@ -55,6 +54,15 @@ public class ModuleInfo {
             this.moduleAuthor = "Unknown";
 
         this.isDefault = moduleClass.getAnnotation(IsDefault.class);
+    }
+
+    public void showModuleError(ModuleError error, String... errorMessage) {
+        this.error = error;
+        ModuleException.SilentThrowModule(this, errorMessage);
+    }
+    public void throwModuleError(ModuleError error) {
+        this.error = error;
+        throw ModuleException.Throw(this);
     }
 
     public final boolean isModuleDefault() {

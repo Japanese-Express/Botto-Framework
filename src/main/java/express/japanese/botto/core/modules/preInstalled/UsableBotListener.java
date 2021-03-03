@@ -1,20 +1,22 @@
 package express.japanese.botto.core.modules.preInstalled;
 
 import express.japanese.botto.BotController;
+import express.japanese.botto.core.ModuleException;
 import express.japanese.botto.core.modules.AbstractListener;
+import express.japanese.botto.core.modules.enums.ModuleError;
 import express.japanese.botto.core.modules.interfaces.Author;
 import express.japanese.botto.core.modules.interfaces.IsDefault;
 import express.japanese.botto.core.modules.interfaces.annotations.IModule;
 import express.japanese.botto.core.modules.module.Module;
 import express.japanese.botto.core.modules.module.events.BotEventType;
 import express.japanese.botto.core.modules.module.events.EventUtil;
-import express.japanese.botto.core.modules.module.events.MessageEvent;
 import express.japanese.botto.core.modules.module.events.MethodInstance;
+import express.japanese.botto.core.modules.module.events.messages.MessageGuildEvent;
+import express.japanese.botto.core.modules.module.events.messages.MessagePrivateEvent;
 import express.japanese.botto.core.modules.module.events.reactions.ReactionAddEvent;
 import express.japanese.botto.core.modules.module.events.reactions.ReactionRemoveEvent;
-import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageReaction;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.events.ShutdownEvent;
 import net.dv8tion.jda.api.events.channel.text.TextChannelCreateEvent;
@@ -25,12 +27,13 @@ import net.dv8tion.jda.api.events.guild.voice.GuildVoiceLeaveEvent;
 import net.dv8tion.jda.api.events.message.MessageDeleteEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.MessageUpdateEvent;
+import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionRemoveEvent;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,17 +47,24 @@ public abstract class UsableBotListener extends AbstractListener {
         this.botController = botController;
     }
 
+    private JDA jda;
 //region START/STOP
     @Override
     public void onReady(@Nonnull ReadyEvent event) {
         super.onReady(event);
         System.out.println("Loading...");
-        // TODO: Bot load events
+        this.jda = event.getJDA();
         System.out.println("Loading modules...");
         botController.moduleInterfaces.forEach((module, iModule) -> {
             if(loadedModules.contains(iModule))
                 return;
-            module.onReady();
+            try {
+                module.onReady();
+            } catch(Exception e) {
+                e.printStackTrace();
+                module.getModuleInfo().showModuleError(ModuleError.FAILED_TO_READY,
+                        e.getMessage(), "Line: " + e.getStackTrace()[0].getLineNumber());
+            }
             loadedModules.add(iModule);
         });
         System.out.println("Bot loaded!");
@@ -83,6 +93,9 @@ public abstract class UsableBotListener extends AbstractListener {
     <T> List<MethodInstance<T>> getEventList(BotEventType<T> type) {
         return EventUtil.getMethodsForEvent(type);
     }
+    private boolean isSelf(User user, User self) {
+        return self.getIdLong() == user.getIdLong();
+    }
 //region CHANNEL_EVENTS
     @Override
     public void onTextChannelCreate(@Nonnull TextChannelCreateEvent event) {
@@ -109,17 +122,46 @@ public abstract class UsableBotListener extends AbstractListener {
 //endregion
 //region MESSAGE_EVENTS
     @Override
-    public void onMessageReceived(@NotNull MessageReceivedEvent event) {
-        super.onMessageReceived(event);
+    public void onGuildMessageReceived(@Nonnull GuildMessageReceivedEvent event) {
+        if(isSelf(event.getAuthor(), event.getJDA().getSelfUser()))
+            return;
+        super.onGuildMessageReceived(event);
         Message msg = event.getMessage();
-        for(MethodInstance<MessageEvent> method : getEventList(BotEventType.USER_MESSAGE)) {
-            method.invoke(new MessageEvent() {
+        for(MethodInstance<MessageGuildEvent> method : getEventList(BotEventType.USER_MESSAGE_GUILD)) {
+            method.invoke(new MessageGuildEvent() {
+                @Override
+                public Message getMessage() {
+                    return msg;
+                }
+                @Override
+                public Guild getGuild() {
+                    return msg.getGuild();
+                }
+            });
+        }
+    }
+
+    @Override
+    public void onPrivateMessageReceived(@Nonnull PrivateMessageReceivedEvent event) {
+        if(isSelf(event.getAuthor(), event.getJDA().getSelfUser()))
+            return;
+        super.onPrivateMessageReceived(event);
+        Message msg = event.getMessage();
+        for(MethodInstance<MessagePrivateEvent> method : getEventList(BotEventType.USER_MESSAGE_PRIVATE)) {
+            method.invoke(new MessagePrivateEvent() {
                 @Override
                 public Message getMessage() {
                     return msg;
                 }
             });
         }
+    }
+
+    @Override
+    public void onMessageReceived(@NotNull MessageReceivedEvent event) {
+        if(isSelf(event.getAuthor(), event.getJDA().getSelfUser()))
+            return;
+        super.onMessageReceived(event);
         moduleCheck(event.getMessage());
     }
     @Override
@@ -134,7 +176,6 @@ public abstract class UsableBotListener extends AbstractListener {
 //region REACTION_EVENTS
     @Override
     public void onMessageReactionAdd(@NotNull MessageReactionAddEvent event) {
-        event.getReaction();
         for(MethodInstance<ReactionAddEvent> method : getEventList(BotEventType.REACTION_ADD)) {
             method.invoke(new ReactionAddEvent() {
                 @Override
@@ -203,6 +244,9 @@ public abstract class UsableBotListener extends AbstractListener {
         if (module != null) {
             IModule annotation = module.getModuleInterface();
             this.runModule(cmd, args, msg, module, annotation);
+            if(module.hasErrors()) {
+                ModuleException.SilentThrowModule(module.getModuleInfo(), "Failed while running module");
+            }
             return true;
         }
         /*else if (BotCore.getHelpInstanced() != null) {
@@ -221,7 +265,7 @@ public abstract class UsableBotListener extends AbstractListener {
 
     @Override
     public void runModule(String cmd, String[] args, Message msg, Module module, IModule annotation) {
-        if(this.isAnnotationOwnerOnly(msg.getAuthor().getId(), annotation))
+        if(this.isAnnotationOwnerOnly(msg.getAuthor().getId(), annotation, botController))
             return;
         if(annotation.serversById().length > 0) {
             if(!msg.isFromGuild())

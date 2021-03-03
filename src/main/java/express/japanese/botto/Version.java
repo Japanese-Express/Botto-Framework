@@ -7,11 +7,17 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.Arrays;
 
+import express.japanese.botto.core.modules.interfaces.ToBeRemoved;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+/**
+ * Deprecated because it's difficult to keep track of constantly.
+ */
+@Deprecated
+@ToBeRemoved(value = "Inactive development, is it really that useful?")
 public class Version {
     public static final int[] current = new int[]{1, 0, 1};
     public static String latest;

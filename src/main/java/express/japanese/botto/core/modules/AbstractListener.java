@@ -1,5 +1,6 @@
 package express.japanese.botto.core.modules;
 
+import express.japanese.botto.BotController;
 import express.japanese.botto.Botto;
 import express.japanese.botto.core.modules.interfaces.annotations.ICooldown;
 import express.japanese.botto.core.modules.interfaces.annotations.IModule;
@@ -89,7 +90,7 @@ public abstract class AbstractListener extends ListenerAdapter {
         return true;
     }
 
-    public boolean isAnnotationOwnerOnly(String userId, IModule annotation) {
-        return annotation.ownerOnly() && !Botto.getOwnerId().equals(userId);
+    public boolean isAnnotationOwnerOnly(String userId, IModule annotation, BotController botController) {
+        return annotation.ownerOnly() && !botController.getOwnerId().equals(userId);
     }
 }

@@ -1,6 +1,7 @@
 package express.japanese.botto.core.modules.module;
 
 import express.japanese.botto.BotController;
+import express.japanese.botto.core.modules.ModuleInfo;
 import express.japanese.botto.core.modules.enums.Language;
 import express.japanese.botto.core.modules.enums.ModuleError;
 import express.japanese.botto.core.modules.interfaces.annotations.ILanguage;
@@ -25,6 +26,7 @@ public abstract class Module extends AbstractModule {
     }
     private final List<ModuleError> moduleErrors = new ArrayList<>();
     protected BotController botControllerInst = null;
+    private ModuleInfo moduleInfo;
     private IModule moduleInterface;
 
     /**
@@ -90,6 +92,10 @@ public abstract class Module extends AbstractModule {
         this.moduleInterface = moduleInterface;
     }
 
+    public final void setModuleInfo(ModuleInfo moduleInfo) {
+        this.moduleInfo = moduleInfo;
+    }
+
     /**
      * Gets full language file
      * @param language
@@ -106,6 +112,10 @@ public abstract class Module extends AbstractModule {
      */
     public final IModule getModuleInterface() {
         return moduleInterface;
+    }
+
+    public ModuleInfo getModuleInfo() {
+        return moduleInfo;
     }
 
     /**

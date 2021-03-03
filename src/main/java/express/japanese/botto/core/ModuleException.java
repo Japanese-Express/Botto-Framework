@@ -8,9 +8,12 @@ public class ModuleException {
                 new Throwable(moduleInfo.getExtractedClass().toGenericString())
         );
     }
-    public static void Err(ModuleInfo moduleInfo) {
-        System.err.println("!!Exception on ModuleInfo!!! ");
-        System.err.println("    Module \"" + moduleInfo.getExtractedClass().getSimpleName() + "\" failed to load");
-        System.err.println("    " + moduleInfo.getError().getErrorMsg());
+
+    private static final String space = "    ";
+    public static void SilentThrowModule(ModuleInfo moduleInfo, String... errMessages) {
+        System.err.println("!!Module \"" + moduleInfo.getExtractedClass().getSimpleName() + "\" had an error!!! ");
+        System.err.println(space +"Reason: " + moduleInfo.getError().getErrorMsg());
+        for (String errMessage : errMessages)
+            System.err.println(space+"- " + errMessage);
     }
 }

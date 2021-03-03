@@ -1,6 +1,7 @@
 package express.japanese.botto.core.modules.module.events.reactions;
 
 import express.japanese.botto.core.modules.module.events.BotEvent;
+import express.japanese.botto.core.modules.module.events.BotEventType;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageReaction;
 

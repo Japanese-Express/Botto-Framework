@@ -6,15 +6,22 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 public class MethodInstance<T> {
-    private Module clazz;
-    private Method method;
-    MethodInstance(Module clazz, Method method) {
+    private final T type;
+    private final Module clazz;
+    private final Method method;
+    MethodInstance(Module clazz, Method method, T type) {
+        this.type = type;
         this.clazz = clazz;
         this.method = method;
     }
-    public void invoke(T t) {
+
+    public Module getOriginModule() {
+        return clazz;
+    }
+
+    public void invoke(Object obj) {
         try {
-            method.invoke(clazz, t);
+            method.invoke(clazz, obj);
         } catch (IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
         }

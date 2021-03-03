@@ -72,7 +72,7 @@ public class BotController {
         JDABuilder jdaBuilder = JDABuilder.createDefault(botBuilder.getToken());
         jdaBuilder.setChunkingFilter(ChunkingFilter.ALL);
         jdaBuilder.setMemberCachePolicy(MemberCachePolicy.ALL);
-        jdaBuilder.enableIntents(GatewayIntent.GUILD_MEMBERS);
+        jdaBuilder.enableIntents(EnumSet.allOf(GatewayIntent.class));
         if(shard != null)
             jdaBuilder.useSharding(shard.getShardNumber(), shard.getShardTotal());
         jdaBuilder.addEventListeners(this.listener);
@@ -278,6 +278,11 @@ public class BotController {
         return null;
     }
 //endregion
+
+
+    public String getOwnerId() {
+        return ownerId;
+    }
 
     public String[] getPrefix() {
         return prefix;

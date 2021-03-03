@@ -1,5 +1,6 @@
 package express.japanese.botto;
 
+import express.japanese.botto.core.modules.interfaces.ToBeRemoved;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -15,7 +16,7 @@ public class Botto {
 
     @NotNull
     public static BotBuilder initialize() {
-        Version.CompareVersion();
+        //Version.CompareVersion();
         /*try {
             JDABuilder builder = JDABuilder.createDefault(Config.getToken());
             builder.addEventListeners(listener);
@@ -68,9 +69,13 @@ public class Botto {
         }*/
     }
 
+    @Deprecated
+    @ToBeRemoved(value = "Moved to BotBuilder")
     public static void setOwnerId(String ownerId) {
         StaticConfig.ownerId = ownerId;
     }
+    @Deprecated
+    @ToBeRemoved(value = "Moved to BotBuilder")
     public static String getOwnerId() {
         return StaticConfig.ownerId;
     }

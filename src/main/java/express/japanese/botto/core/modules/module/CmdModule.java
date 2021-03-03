@@ -2,6 +2,7 @@ package express.japanese.botto.core.modules.module;
 
 import express.japanese.botto.core.modules.enums.BotCategory;
 import express.japanese.botto.core.modules.enums.Language;
+import express.japanese.botto.core.modules.enums.ModuleError;
 import express.japanese.botto.core.modules.interfaces.annotations.ILanguage;
 import express.japanese.botto.core.modules.interfaces.annotations.IModule;
 import net.dv8tion.jda.api.Permission;
@@ -35,6 +36,13 @@ public abstract class CmdModule extends Module {
      */
     public abstract void run(String cmd, @Nonnull String[] args, Message msg);
 
+    public final void showHelpForChannel(TextChannel channel, Language language) {
+        ILanguage iLanguage = this.getFullDescByLang(language);
+        if(iLanguage != null)
+            channel.sendMessage(iLanguage.value()).queue();
+        else
+            this.addError(ModuleError.INVALID_LANGUAGE);
+    }
     /**
      * Runs the help command for the chosen module
      * @param forModuleName literal module name
